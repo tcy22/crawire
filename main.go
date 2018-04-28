@@ -12,7 +12,7 @@ func main(){
 		ParserFunc:  parser.ParseCityList,
 	})*/
 	e := engine.ConcurrentEngine{
-		Scheduler: &schedular.SimpleScheduler{},
+		Scheduler: &schedular.QueuedScheduler{},
 		WorkerCount:10,
 	}
 	e.Run(engine.Request{
