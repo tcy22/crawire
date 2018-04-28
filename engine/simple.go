@@ -6,7 +6,9 @@ import (
 	"fmt"
 )
 
-func Run(seeds ...Request){
+type SimpleEngine struct{}
+
+func (e SimpleEngine) Run(seeds ...Request){
 	var requests []Request
 	for _,r := range seeds {
 		requests = append(requests,r)
@@ -16,14 +18,10 @@ func Run(seeds ...Request){
 		r := requests[0]
 		requests =requests[1:]
 
-		log.Printf("Fetching %s",r.Url)
-		body,err := fetcher.Fetcher(r.Url) //从网络上获取数据，然后由不同的解析器解析数据
+		ParseResult,err := worker(r)
 		if err != nil {
-			log.Printf("Fetcher:error fetching url %s,%v",r.Url,err)
 			continue
 		}
-
-		ParseResult := r.ParserFunc(body)
 		requests = append(requests,ParseResult.Requests...)//把slice里面的内容展开一个一个加进里面
 		fmt.Println(ParseResult.Requests)
 
@@ -31,4 +29,14 @@ func Run(seeds ...Request){
 			log.Printf("Got item %s",item)
 		}
 	}
+}
+
+func worker(r Request)(ParseResult,error){
+	log.Printf("Fetching %s",r.Url)
+	body,err := fetcher.Fetcher(r.Url) //从网络上获取数据，然后由不同的解析器解析数据
+	if err != nil {
+		log.Printf("Fetcher:error fetching url %s,%v",r.Url,err)
+		return ParseResult{},err
+	}
+	return r.ParserFunc(body),nil
 }

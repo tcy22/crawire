@@ -10,13 +10,17 @@ import (
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding/unicode"
 	"log"
+	"time"
 )
+
+var rateLimiter = time.Tick(100 * time.Millisecond)
 
 //从网络上获取数据的模块
 func Fetcher(url string) ([]byte,error){
+	<- rateLimiter
 	resp,err := http.Get(url)
 
-	fmt.Printf("Fetcher resp url:%#v\n",resp)
+	//fmt.Printf("Fetcher resp url:%#v\n",resp)
 	//fmt.Printf("Fetcher resp url:%s,resp.StatusCode:%d\n",url,resp.StatusCode)
 	if err != nil {
 		return nil,err
