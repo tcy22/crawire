@@ -3,7 +3,6 @@ package engine
 import (
 	"crawier/fetcher"
 	"log"
-	"fmt"
 )
 
 func Run(seeds ...Request){
@@ -25,7 +24,6 @@ func Run(seeds ...Request){
 
 		ParseResult := r.ParserFunc(body)
 		requests = append(requests,ParseResult.Requests...)//把slice里面的内容展开一个一个加进里面
-		fmt.Println(ParseResult.Requests)
 
 		for _,item := range ParseResult.Items {
 			log.Printf("Got item %s",item)

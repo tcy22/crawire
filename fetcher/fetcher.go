@@ -14,16 +14,22 @@ import (
 
 //从网络上获取数据的模块
 func Fetcher(url string) ([]byte,error){
-	resp,err := http.Get(url)
 
-	fmt.Printf("Fetcher resp url:%#v\n",resp)
-	//fmt.Printf("Fetcher resp url:%s,resp.StatusCode:%d\n",url,resp.StatusCode)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil,err
+		log.Fatalln(err)
 	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusForbidden {//得到头部，body之类的
+	if resp.StatusCode != http.StatusOK {//得到头部，body之类的
 		return nil,fmt.Errorf("rong status code: %d",resp.StatusCode)
 	}
 

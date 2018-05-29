@@ -13,7 +13,7 @@ func ParseCityList(contents []byte) engine.ParseResult{
 	matches := re.FindAllSubmatch(contents,-1)     //[][][]byte
 
 	result := engine.ParseResult{}
-	limit := 5
+	limit := 5  //只获取5个城市
 	for _,m := range matches {
 		result.Items = append(result.Items,"City "+string(m[2]))
 		result.Requests = append(result.Requests,engine.Request{
