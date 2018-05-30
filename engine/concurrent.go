@@ -1,6 +1,8 @@
 package engine
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ConcurrentEngine struct {
 	Scheduler Scheduler
@@ -19,6 +21,7 @@ func (e *ConcurrentEngine) Run(seeds ... Request){
 	e.Scheduler.Run()   //等待新的任务的到来
 
 	for i:=0; i < e.WorkerCount; i++ {
+		//每个work goroutine都有自己的in channel,这里开了10个
 		createWorker(out,e.Scheduler)
 	}
     //把对engine的请求全部交给scheduler
@@ -42,7 +45,7 @@ func createWorker(out chan ParseResult,s Scheduler){
 	in := make(chan Request)
 	go func() {
 		for{
-			// tell scheduler I am ready
+			// 每个work goroutine都有自己的in channel，从channel里取出要执行的request
 			s.WorkerReady(in)
 			Request := <- in
 			result,err := worker(Request)
