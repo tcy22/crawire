@@ -1,6 +1,10 @@
 package engine
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"crawier/fetcher"
+)
 
 type ConcurrentEngine struct {
 	Scheduler Scheduler
@@ -13,19 +17,16 @@ type Scheduler interface {
 }
 
 func (e *ConcurrentEngine) Run(seeds ... Request){
-/*	for _,r := range seeds {
-		e.Scheduler.Submit(r)
-	}*/
 
 	in := make(chan Request)
 	out := make(chan ParseResult)
-	e.Scheduler.ConfigureMasterWorkerChan(in)
+	e.Scheduler.ConfigureMasterWorkerChan(in)//构造输入chan
 
 	for i:=0; i < e.WorkerCount; i++ {
-		createWorker(in,out)
+		createWorker(in,out)         //开10个可以爬取信息和解析信息的goroutine
 	}
     //把对engine的请求全部交给scheduler
-	for _,r := range seeds {
+	for _,r := range seeds {//往scheduler的chan里面发任务,代替了队列，抢占chan
 		e.Scheduler.Submit(r)
 	}
 
@@ -47,12 +48,22 @@ func (e *ConcurrentEngine) Run(seeds ... Request){
 func createWorker(in chan Request,out chan ParseResult){
 	go func() {
 		for{
-			Request := <- in
-			result,err := worker(Request)
+			Request := <- in       //输入的request
+			result,err := workerc(Request)
 			if err != nil {
 				continue
 			}
-			out <- result
+			out <- result         //爬取URL，且解析出有用内容的返回信息
 		}
 	}()
+}
+
+func workerc(r Request)(ParseResult,error){
+	log.Printf("Fetching %s",r.Url)
+	body,err := fetcher.Fetcher(r.Url) //从网络上获取数据，然后由不同的解析器解析数据
+	if err != nil {
+		log.Printf("Fetcher:error fetching url %s,%v",r.Url,err)
+		return ParseResult{},err
+	}
+	return r.ParserFunc(body),nil
 }

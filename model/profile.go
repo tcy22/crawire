@@ -3,7 +3,7 @@ package model
 type Profile struct {
 	Name          string
 	//Gender        string
-	Age           int
+	Age           string
 /*	Height         int
 	Weight        int
 	Income        string*/
