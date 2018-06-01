@@ -1,12 +1,9 @@
 package engine
 
-import (
-	"fmt"
-)
-
 type ConcurrentEngine struct {
-	Scheduler Scheduler
+	Scheduler   Scheduler
 	WorkerCount int
+	ItemChan    chan Item
 }
 
 type Scheduler interface {
@@ -28,13 +25,16 @@ func (e *ConcurrentEngine) Run(seeds ... Request){
 	for _,r := range seeds {
 		e.Scheduler.Submit(r)
 	}
-	itemCount := 0    //计数器
 	for{
 		result := <- out
 		for _,item := range result.Items{
-			fmt.Printf("Got item #%d: %v",itemCount,item)
-			itemCount++
+			go func(it Item){//此处若为func(),则go func里面的item与for里面的不对应。
+				e.ItemChan <- it
+			}(item)
 		}
+		//这里直接save()不行，因为拿到worker要尽快脱手，拿到request要尽快脱手。不能在这里花费太长时间去save
+		//解决1、go save(item)
+		//解决2、go func(){itemChan <- item}
 		for _,request := range result.Requests {
 			e.Scheduler.Submit(request)
 		}

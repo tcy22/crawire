@@ -1,0 +1,45 @@
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="CSS/page.css">
+    <style type="text/css">
+    </style>
+</head>
+
+<body>
+	<div>
+		<form method="get" id="searchform" action="">
+			<fieldset class="search">
+				<input type="text" class="box" name="s" id="s" class="inputText" placeholder="" x-webkit-speech>
+				<button class="btn" title="SEARCH"> </button>
+			</fieldset>
+		</form>
+	</div>
+    <div>
+		<p>共为你找到相关结果约为{{.Hits}}个，显示从{{.Start}}起共{{.len. Items}}个</p>
+    </div>
+    <div>
+	<table width="100%">
+		<tbody>
+		{{range .Items}}
+        <tr>
+			<td><a href="{{.Url}}">{{.Payload.Name}}</a></td>
+			{{with .Payload}}
+			<td>{{.Age}}</td>
+			<td>{{.Gender}}</td>
+			<td>{{.Marriage}}</td>
+			<td>{{.Education}}</td>
+			<td>{{.Profession}}</td>
+			<td>{{.Hukou}}</td>
+			{{end}}
+        </tr>
+		{{else}}
+		<div>没有找到相关用户</div>
+		{{end}}
+		</tbody>
+	</table>
+	</div>
+</body>
+
+</html>
